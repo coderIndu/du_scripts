@@ -9,7 +9,7 @@ Cookie2=...
 # 格式(wskey.sh):
 Cookie1="pin=xxx;wskey=xxx"
 Cookie2=...
-发送wskey/cookie至bot即可自动增加/替换。
+发送wskey/cookie至bot即可自动增加替换。
 */
 
 
@@ -49,6 +49,7 @@ if ($.isNode()) {
       $.isLogin = true;
       $.nickName = '';
       message = '';
+      // console.log(cookie)
       await TotalBean(); // 检测失效cookie
       if (!$.isLogin) {
         $.msg($.name, `\n【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\n`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
@@ -73,10 +74,11 @@ function runAll() {
   return new Promise(async resolve => {
     let result = ""
     try {
+      console.log(pin)
       let wskey = await findWskey(pin)
       let tokenKey = await getTokenKey(wskey)
       let newCookie = await getJDCookie(tokenKey)
-      if (wskey != "" && tokenKey != "" && newCookie != "") {
+      if (wskey != "" && tokenKey != undefined && newCookie != "") {
         console.log(`账号的wskey: ${wskey}\n账号的tokenKey: ${tokenKey}\n新的Cookie: ${newCookie}\n`);
         result = await addCookie(newCookie)
       } else {
@@ -161,19 +163,20 @@ function findWskey(pin) {
     } catch (error) {
       console.log("查找wskey失败", error);
     } finally {
+      console.log(wskey)
       resolve(wskey)
     }
   })
 }
 
+
 // 获取TokenKey
 function getTokenKey(wsCookie) {
   return new Promise(async resolve => {
-    let data = await getSign()
-    // console.log(data);
-    let body = "body=%7B%22to%22%3A%20%22https%3A//home.m.jd.com/myJd/newhome.action%22%2C%20%22action%22%3A%20%22to%22%7D"
+    let body = "body=%7B%22action%22%3A%22to%22%2C%22to%22%3A%22https%253A%252F%252Fh5.m.jd.com%252FbabelDiy%252FZeus%252F2bf3XEEyWG11pQzPGkKpKX2GxJz2%252Findex.html%253FbabelChannel%253Dttt2%2526doTask%253Dc%22%7D&"
+    // https://api.m.jd.com/client.action?functionId=genToken&${data}${body}
     const option = {
-      url: `https://api.m.jd.com/client.action?functionId=genToken&${data}&${body}`,
+      url: `https://api.m.jd.com/client.action?functionId=genToken&clientVersion=10.2.6&build=91563&client=android&partner=xiaomi001&oaid=e8dab32fa48fc28a&eid=eidAc164812151sedEIbZs7ARjaWGHvyEylD3HRCHOPZQ/j/jIzBgLsklI+FG2NllDOe1Wx69bDCFGT4VF80qJnPXgpu/xEEQUSC588nMoqxMeRIfDZT&sdkVersion=30&lang=zh_CN&harmonyOs=0&networkType=wifi&uts=0f31TVRjBSvr80ezMhXI0CmaXAcEQ0ajjpt5D6BU%2BuNIlc6ZDb9gsYOb1GBvDIw0fIikx20yzmgxODf%2B8Wzz1pWkkhDuvRBja3jdr90Ph7VuWgVGVPoUMZV%2F4Yney6e1kGDAj%2BfByoJJTwyGWBnL3Wr9ysz5ZWlkPrepEX5nohcS0cs5PtsYLKw1nOxJdV%2B8GwnMF824SkdXkMXmg4N5Mw%3D%3D&uemps=0-0&ext=%7B%22prstate%22%3A%220%22%7D&ef=1&ep=%7B%22hdid%22%3A%22JM9F1ywUPwflvMIpYPok0tt5k9kW4ArJEU3lfLhxBqw%3D%22%2C%22ts%22%3A1639972110147%2C%22ridx%22%3A-1%2C%22cipher%22%3A%7B%22area%22%3A%22CJrpCJG4Cv8nDNq1XzG5CNO2%22%2C%22d_model%22%3A%22JWunCK%3D%3D%22%2C%22wifiBssid%22%3A%22dW5hbw93bq%3D%3D%22%2C%22osVersion%22%3A%22CJO%3D%22%2C%22d_brand%22%3A%22WQvrb21f%22%2C%22screen%22%3A%22CtSmDsenCNqm%22%2C%22uuid%22%3A%22CWG4YWS1Y2G4CtG0ZtC2Ym%3D%3D%22%2C%22aid%22%3A%22CWG4YWS1Y2G4CtG0ZtC2Ym%3D%3D%22%2C%22openudid%22%3A%22CWG4YWS1Y2G4CtG0ZtC2Ym%3D%3D%22%7D%2C%22ciphertype%22%3A5%2C%22version%22%3A%221.2.0%22%2C%22appname%22%3A%22com.jingdong.app.mall%22%7D&st=1639972126338&sign=b8a18f60cee8997f0413bd295d67cd46&sv=102&${body}`,
       headers: {
         "Host": 'api.m.jd.com',
         "Cookie": wsCookie,
@@ -184,7 +187,7 @@ function getTokenKey(wsCookie) {
         'content-type': 'application/x-www-form-urlencoded;',
       },
     }
-    // console.log(option);
+    console.log(option);
     $.post(option, (err, resp, data) => {
       try {
         if (err) {
@@ -192,11 +195,13 @@ function getTokenKey(wsCookie) {
           data = ""
           $.logErr(err);
         } else {
+          // console.log(resp)
           data = JSON.parse(data)['tokenKey']
         }
       } catch (error) {
         $.logErr(error)
       } finally {
+        // console.log(data)
         resolve(data)
       }
     })
@@ -206,33 +211,51 @@ function getTokenKey(wsCookie) {
 // 获取sign
 function getSign() {
   return new Promise(resolve => {
-    const option = {
-      url: `https://api.jds.codes/gentoken`,
-      headers: {
-        "user-agent": "Mozilla/5.0 (Windows NT 6.3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        "url": 'https://home.m.jd.com/myJd/newhome.action'
-      }),
-    }
+    // const option = {
+    //   url: `http://43.135.90.23/wskey`,
+    //   headers: {
+    //     "user-agent": "Mozilla/5.0 (Windows NT 6.3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
+    //     // "Content-Type": "application/json"
+    //     "Connection": "close"
+    //   },
+    //   // body: JSON.stringify({
+    //   //   "url": 'https://home.m.jd.com/myJd/newhome.action'
+    //   // }),
+    // }
 
-    $.post(option, (err, resp, data) => {
-      try {
-        if (err) {
-          console.log(`\n${$.name}: API查询请求失败 ‼️‼️`)
-          $.logErr(err);
-        } else {
-          data = JSON.parse(data)['data']['sign'].split('&')
-          let sign = `${data[1]}&${data[2]}&${data[3]}&${data[4]}&${data[5]}&${data[6]}`
-          data = sign
-        }
-      } catch (e) {
-        $.logErr(e, resp);
-      } finally {
-        resolve(data);
-      }
-    })
+    // $.get(option, (err, resp, data) => {
+    //   try {
+    //     if (err) {
+    //       console.log(`\n${$.name}: API查询请求失败 ‼️‼️`)
+    //       console.log(resp)
+    //       $.logErr(err);
+    //     } else {
+    //       data = JSON.parse(data)
+    //       console.log(typeof data)
+    //       let sign = ""
+    //       for (const key in data) {
+    //         sign += `${key}=${data[key]}&`
+    //       }
+    //       // let sign = `${data[1]}&${data[2]}&${data[3]}&${data[4]}&${data[5]}&${data[6]}`
+    //       console.log(sign)
+    //       // data = sign
+    //     }
+    //   } catch (e) {
+    //     $.logErr(e, resp);
+    //   } finally {
+    //     // console.log(data)
+    //     resolve(data);
+    //   }
+    // })
+    let data = {"clientVersion":"10.2.2","client":"apple","sv":"120","st":new Date().getTime(),"uuid":"949f1cc6d00ef394","sign":"2b2a3aef7174c86953b27b8ce8725692"}
+    // data = JSON.parse(data)
+    // console.log(typeof data)
+    let sign = ""
+    for (const key in data) {
+      sign += `${key}=${data[key]}&`
+    }
+    console.log(sign)
+    resolve(sign)
   })
 }
 // axios.interceptors.response.use(function (response) {
@@ -252,7 +275,7 @@ function getJDCookie(tokenKey) {
 
     const option = {
       method: 'get',
-      url: `https://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${tokenKey}&to=https://home.m.jd.com/myJd/newhome.action`,
+      url: `https://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${tokenKey}&to=https://h5.m.jd.com/babelDiy/Zeus/2bf3XEEyWG11pQzPGkKpKX2GxJz2/index.html?babelChannel=ttt2&doTask=c`,
       headers: {
         "Connection": 'Keep-Alive',
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -293,6 +316,7 @@ function getJDCookie(tokenKey) {
 
 function TotalBean() {
   return new Promise(async resolve => {
+    // console.log(cookie)
     const options = {
       "url": `https://wq.jd.com/user/info/QueryJDUserInfo?sceneval=2`,
       "headers": {
@@ -304,8 +328,7 @@ function TotalBean() {
         "Cookie": cookie,
         "Referer": "https://wqs.jd.com/my/jingdou/my.shtml?sceneval=2",
         "User-Agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1")
-      },
-      "timeout": 10000,
+      }
     }
     $.post(options, (err, resp, data) => {
       try {
@@ -319,17 +342,15 @@ function TotalBean() {
               $.isLogin = false; //cookie过期
               return
             }
-            if (data['retcode'] === 0) {
-              $.nickName = (data['base'] && data['base'].nickname) || $.UserName;
-            } else {
-              $.nickName = $.UserName
+            if (data['retcode'] === 0 && data.base && data.base.nickname) {
+              $.nickName = data.base.nickname;
             }
           } else {
             console.log(`京东服务器返回空数据`)
           }
         }
       } catch (e) {
-        $.logErr(e, resp)
+        $.logErr(e)
       } finally {
         resolve();
       }
