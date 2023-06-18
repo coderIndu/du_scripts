@@ -1,0 +1,27 @@
+{
+  "dependencies": {
+    "axios": "^0.27.2",
+    "chalk": "^4.1.2",
+    "replace-in-file": "^6.3.5",
+    "tough-cookie": "^4.1.2",
+    "uuid": "^9.0.0"
+  },
+  "name": "du_scripts",
+  "version": "1.0.0",
+  "main": "addCookieEnv.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coderIndu/du_scripts.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/coderIndu/du_scripts/issues"
+  },
+  "homepage": "https://github.com/coderIndu/du_scripts#readme",
+  "description": ""
+}
