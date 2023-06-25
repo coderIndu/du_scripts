@@ -26,8 +26,8 @@ const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let cookiesArr = [], cookie = '', message, noFailure = true;
 // console.log(process.env)
 const { COOKIEPATH, WSKEYPATH } = process.env
-const cookiePath = COOKIEPATH
-const wskeyPath = WSKEYPATH
+const cookiePath = COOKIEPATH || '/ql/data/config/cookie.sh'
+const wskeyPath = WSKEYPATH || '/ql/data/config/wskey.sh'
 //IOS等用户直接用NobyDa的jd cookie
 // axios.maxRedirects: 5, // default
 if ($.isNode()) {
